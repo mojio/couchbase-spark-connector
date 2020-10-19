@@ -32,7 +32,7 @@ steps:
 - task: PublishBuildArtifacts@1
   displayName: 'Publish JAR file to Artifacts'
   inputs:
-    PathtoPublish: '$(Build.Repository.LocalPath)/target/scala-2.11'
+    PathtoPublish: '$(Build.Repository.LocalPath)/build/libs'
     ArtifactName: 'jar-file'
 
 - task: MavenAuthenticate@0
