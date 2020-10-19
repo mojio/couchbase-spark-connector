@@ -24,7 +24,7 @@ steps:
   displayName: 'Build JAR File with Gradle'
   inputs:
     gradleWrapperFile: 'gradlew'
-    tasks: 'sourcesJar' # build -x test
+    tasks: 'build -x test'
     publishJUnitResults: false
     javaHomeOption: 'JDKVersion'
     sonarQubeRunAnalysis: false
@@ -34,7 +34,7 @@ steps:
   inputs:
     PathtoPublish: '$(Build.Repository.LocalPath)/build/libs'
     ArtifactName: 'jar-file'
-    # https://dev.azure.com/mojio/_apis/resources/Containers/3433820/jar-file?itemPath=jar-file%2Fcouchbase-spark-connector_2.11-2.3.0.jar
+
 - task: MavenAuthenticate@0
   inputs:
     artifactsFeeds: 'Analytics'
