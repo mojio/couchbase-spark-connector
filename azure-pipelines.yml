@@ -24,7 +24,7 @@ steps:
   displayName: 'Build JAR File with Gradle'
   inputs:
     gradleWrapperFile: 'gradlew'
-    tasks: 'build -x test'
+    tasks: 'sourcesJar' # build -x test
     publishJUnitResults: false
     javaHomeOption: 'JDKVersion'
     sonarQubeRunAnalysis: false
