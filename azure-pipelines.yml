@@ -24,8 +24,8 @@ steps:
   displayName: 'Build JAR File with Gradle'
   inputs:
     gradleWrapperFile: 'gradlew'
-    tasks: 'build -x test'
-    # tasks: 'publishToMavenLocal'
+    # tasks: 'build -x test'
+    tasks: 'publishToMavenLocal --debug'
     publishJUnitResults: false
     javaHomeOption: 'JDKVersion'
     sonarQubeRunAnalysis: false
