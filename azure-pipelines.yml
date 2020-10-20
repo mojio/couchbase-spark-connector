@@ -1,0 +1,66 @@
+variables:
+  system.debug: true
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+name: $(rev:r)
+
+steps:
+
+# I'm sure there is a proper way of doing this using maven/gradle/etc.  for now, just do this.
+- task: PowerShell@2
+  displayName: 'Manually patch all SF Manifest versions'
+  inputs:
+    targetType: 'inline'
+    pwsh: true
+    script: |
+      $filePath = "build.gradle"
+      Write-Host "Looking at file ${filePath}, directory list for this file:"
+      ls $filePath
+      (Get-Content $filePath).replace("version = '2.3.0'", "version = '2.3.1-MOJIO-$(Build.BuildNumber)'") | Set-Content $filePath
+      (Get-Content $filePath).replace("sparkVersion = `"2.3.0`"", "sparkVersion = `"2.3.1`"") | Set-Content $filePath
+
+# Generate JAR file
+- task: Gradle@2
+  displayName: 'Build JAR File with Gradle'
+  inputs:
+    gradleWrapperFile: 'gradlew'
+    # tasks: 'build -x test'
+    tasks: 'publishToMavenLocal --debug'
+    publishJUnitResults: false
+    javaHomeOption: 'JDKVersion'
+    sonarQubeRunAnalysis: false
+
+# Generate POM file for publishing
+- task: Gradle@2
+  displayName: 'Build POM File with Gradle'
+  inputs:
+    gradleWrapperFile: 'gradlew'
+    tasks: 'generatePomFileForMavenJavaPublication --debug'
+    publishJUnitResults: false
+    javaHomeOption: 'JDKVersion'
+    sonarQubeRunAnalysis: false
+
+# for ease of debugging, send all the output to build artifacts
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish files to Artifacts'
+  inputs:
+    PathtoPublish: '$(Build.Repository.LocalPath)/build'
+    ArtifactName: 'files'
+
+# TODO: is this even needed for the following step?
+- task: MavenAuthenticate@0
+  inputs:
+    artifactsFeeds: 'Analytics'
+
+# Publish the package to Azure DevOps artifacts repo
+- task: AzureCLI@2
+  displayName: 'Publish package to azure devops repo'
+  inputs:
+    azureSubscription: 'BizSpark Development (RM)'
+    scriptType: 'pscore'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      # mvn deploy:deploy-file "-Durl=$(azDevOpsArtifactsUrl)" "-DrepositoryId=Analytics" "-Dfile=$(Build.Repository.LocalPath)/build/libs/couchbase-spark-connector_2.11-2.3.1-MOJIO.jar" "-Dtoken=$(azDevOpsArtifactsPassword)" "-DgeneratePom=true" "-DgeneratePom.description=couchbase" "-Dpackaging=jar" "-Dversion=2.3.1-MOJIO-$(Build.BuildNumber)" "-DgroupId=com.couchbase.client" "-DartifactId=spark-connector"
+      mvn deploy:deploy-file "-Durl=$(azDevOpsArtifactsUrl)" "-DrepositoryId=Analytics" "-Dfile=$(Build.Repository.LocalPath)/build/libs/couchbase-spark-connector_2.11-2.3.1-MOJIO-$(Build.BuildNumber).jar" "-Dtoken=$(azDevOpsArtifactsPassword)" "-DgeneratePom=false" "-DpomFile=$(Build.Repository.LocalPath)/build/publications/mavenJava/pom-default.xml" "-Dpackaging=jar"
