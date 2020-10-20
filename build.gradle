@@ -19,11 +19,11 @@ repositories {
 }
 
 ext {
-	sparkVersion = "2.3.1"
+	sparkVersion = "2.3.0"
 }
 
 group = 'com.couchbase.client'
-version = '2.3.1-MOJIO'
+version = '2.3.0'
 
 dependencies {
 	compile files("$sourceSets.main.scala.outputDir")

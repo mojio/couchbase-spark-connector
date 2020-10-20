@@ -18,7 +18,8 @@ steps:
       $filePath = "build.gradle"
       Write-Host "Looking at file ${filePath}, directory list for this file:"
       ls $filePath
-      (Get-Content $filePath).replace("version = '2.3.1-MOJIO'", "version = '2.3.1-MOJIO-$(Build.BuildNumber)'") | Set-Content $filePath
+      (Get-Content $filePath).replace("version = '2.3.0'", "version = '2.3.1-MOJIO-$(Build.BuildNumber)'") | Set-Content $filePath
+      (Get-Content $filePath).replace("sparkVersion = `"2.3.0`"", "sparkVersion = `"2.3.1`"") | Set-Content $filePath
 
 # Generate JAR file
 - task: Gradle@2
