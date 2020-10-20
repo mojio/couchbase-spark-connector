@@ -30,11 +30,20 @@ steps:
     javaHomeOption: 'JDKVersion'
     sonarQubeRunAnalysis: false
 
+- task: Gradle@2
+  displayName: 'Build POM File with Gradle'
+  inputs:
+    gradleWrapperFile: 'gradlew'
+    tasks: 'generatePomFileForMavenJavaPublication --debug'
+    publishJUnitResults: false
+    javaHomeOption: 'JDKVersion'
+    sonarQubeRunAnalysis: false
+
 - task: PublishBuildArtifacts@1
   displayName: 'Publish JAR file to Artifacts'
   inputs:
     # PathtoPublish: '~/.m2/repository/com/couchbase/client/spark-connector_2.11/2.3.1-MOJIO'
-    PathtoPublish: '$(Build.Repository.LocalPath)/build/libs'
+    PathtoPublish: '$(Build.Repository.LocalPath)/build'
     ArtifactName: 'jar-file'
 
 - task: MavenAuthenticate@0
@@ -48,5 +57,5 @@ steps:
     scriptType: 'pscore'
     scriptLocation: 'inlineScript'
     inlineScript: |
-      # mvn deploy:deploy-file "-Durl=$(githubPackagesUrl)" "-DrepositoryId=Analytics" "-Dfile=$(Build.Repository.LocalPath)/build/libs/couchbase-spark-connector_2.11-2.3.1-MOJIO.jar" "-Dtoken=$(githubPackagesPassword)" "-DgeneratePom=true" "-DgeneratePom.description=couchbase" "-Dpackaging=jar" "-Dversion=2.3.1-MOJIO-$(Build.BuildNumber)" "-DgroupId=com.couchbase.client" "-DartifactId=spark-connector"
       mvn deploy:deploy-file "-Durl=$(azDevOpsArtifactsUrl)" "-DrepositoryId=Analytics" "-Dfile=$(Build.Repository.LocalPath)/build/libs/couchbase-spark-connector_2.11-2.3.1-MOJIO.jar" "-Dtoken=$(azDevOpsArtifactsPassword)" "-DgeneratePom=true" "-DgeneratePom.description=couchbase" "-Dpackaging=jar" "-Dversion=2.3.1-MOJIO-$(Build.BuildNumber)" "-DgroupId=com.couchbase.client" "-DartifactId=spark-connector"
+      # mvn deploy:deploy-file "-Durl=$(azDevOpsArtifactsUrl)" "-DrepositoryId=Analytics" "-Dfile=$(Build.Repository.LocalPath)/build/libs/couchbase-spark-connector_2.11-2.3.1-MOJIO.jar" "-Dtoken=$(azDevOpsArtifactsPassword)" "-DgeneratePom=false" "-DpomFile=$(Build.Repository.LocalPath)/build/libs/couchbase-spark-connector_2.11-2.3.1-MOJIO.pom" "-Dpackaging=jar" "-Dversion=2.3.1-MOJIO-$(Build.BuildNumber)" "-DgroupId=com.couchbase.client" "-DartifactId=spark-connector"
