@@ -25,7 +25,7 @@ steps:
   inputs:
     gradleWrapperFile: 'gradlew'
     # tasks: 'build -x test'
-    tasks: 'publish'
+    tasks: 'publishToMavenLocal'
     publishJUnitResults: false
     javaHomeOption: 'JDKVersion'
     sonarQubeRunAnalysis: false
@@ -33,7 +33,7 @@ steps:
 - task: PublishBuildArtifacts@1
   displayName: 'Publish JAR file to Artifacts'
   inputs:
-    PathtoPublish: '$(Build.Repository.LocalPath)/build/libs'
+    PathtoPublish: '~/.m2/repository/com/couchbase/client/spark-connector_2.11/2.3.1-MOJIO'
     ArtifactName: 'jar-file'
 
 - task: MavenAuthenticate@0
@@ -47,5 +47,5 @@ steps:
     scriptType: 'pscore'
     scriptLocation: 'inlineScript'
     inlineScript: |
-      # mvn deploy:deploy-file "-Durl=$(githubPackagesUrl)" "-DrepositoryId=Analytics" "-Dfile=$(Build.Repository.LocalPath)/build/libs/couchbase-spark-connector_2.11-2.3.0.jar" "-Dtoken=$(githubPackagesPassword)" "-DgeneratePom=true" "-DgeneratePom.description=couchbase" "-Dpackaging=jar" "-Dversion=2.3.0-MOJIO-$(Build.BuildNumber)" "-DgroupId=com.couchbase.client" "-DartifactId=spark-connector"
-      mvn deploy:deploy-file "-Durl=$(azDevOpsArtifactsUrl)" "-DrepositoryId=Analytics" "-Dfile=$(Build.Repository.LocalPath)/build/libs/couchbase-spark-connector_2.11-2.3.0.jar" "-Dtoken=$(azDevOpsArtifactsPassword)" "-DgeneratePom=true" "-DgeneratePom.description=couchbase" "-Dpackaging=jar" "-Dversion=2.3.0-MOJIO-$(Build.BuildNumber)" "-DgroupId=com.couchbase.client" "-DartifactId=spark-connector"
+      # mvn deploy:deploy-file "-Durl=$(githubPackagesUrl)" "-DrepositoryId=Analytics" "-Dfile=~/.m2/repository/com/couchbase/client/spark-connector_2.11/2.3.1-MOJIO/spark-connector_2.11-2.3.1-MOJIO.jar" "-Dtoken=$(githubPackagesPassword)" "-DgeneratePom=true" "-DgeneratePom.description=couchbase" "-Dpackaging=jar" "-Dversion=2.3.0-MOJIO-$(Build.BuildNumber)" "-DgroupId=com.couchbase.client" "-DartifactId=spark-connector"
+      mvn deploy:deploy-file "-Durl=$(azDevOpsArtifactsUrl)" "-DrepositoryId=Analytics" "-Dfile=~/.m2/repository/com/couchbase/client/spark-connector_2.11/2.3.1-MOJIO/spark-connector_2.11-2.3.1-MOJIO.jar" "-Dtoken=$(azDevOpsArtifactsPassword)" "-DgeneratePom=true" "-DgeneratePom.description=couchbase" "-Dpackaging=jar" "-Dversion=2.3.0-MOJIO-$(Build.BuildNumber)" "-DgroupId=com.couchbase.client" "-DartifactId=spark-connector"
