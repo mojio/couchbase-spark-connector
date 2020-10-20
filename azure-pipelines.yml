@@ -8,18 +8,19 @@ name: $(rev:r)
 
 steps:
 
-# - task: Docker@0
-#   displayName: 'Build JAR File with SBT'
-#   inputs:
-#     containerregistrytype: 'Container Registry'
-#     action: 'Run an image'
-#     imageName: 'bigtruedata/sbt:0.13.15-2.12.2'
-#     qualifyImageName: false
-#     containerName: sbt
-#     volumes: '$(Build.Repository.LocalPath):/app'
-#     containerCommand: 'sbt "set test in Test := {}" clean assembly'
-#     detached: false
+# I'm sure there is a proper way of doing this using maven/gradle/etc.  for now, just do this.
+- task: PowerShell@2
+  displayName: 'Manually patch all SF Manifest versions'
+  inputs:
+    targetType: 'inline'
+    pwsh: true
+    script: |
+      $filePath = "build.gradle"
+      Write-Host "Looking at file ${filePath}, directory list for this file:"
+      ls $filePath
+      (Get-Content $filePath).replace("version = '2.3.1-MOJIO'", "version = '2.3.1-MOJIO-$(Build.BuildNumber)'") | Set-Content $filePath
 
+# Generate JAR file
 - task: Gradle@2
   displayName: 'Build JAR File with Gradle'
   inputs:
@@ -30,6 +31,7 @@ steps:
     javaHomeOption: 'JDKVersion'
     sonarQubeRunAnalysis: false
 
+# Generate POM file for publishing
 - task: Gradle@2
   displayName: 'Build POM File with Gradle'
   inputs:
@@ -39,25 +41,25 @@ steps:
     javaHomeOption: 'JDKVersion'
     sonarQubeRunAnalysis: false
 
+# for ease of debugging, send all the output to build artifacts
 - task: PublishBuildArtifacts@1
-  displayName: 'Publish JAR file to Artifacts'
+  displayName: 'Publish files to Artifacts'
   inputs:
-    # PathtoPublish: '~/.m2/repository/com/couchbase/client/spark-connector_2.11/2.3.1-MOJIO'
     PathtoPublish: '$(Build.Repository.LocalPath)/build'
-    ArtifactName: 'jar-file'
+    ArtifactName: 'files'
 
+# TODO: is this even needed for the following step?
 - task: MavenAuthenticate@0
   inputs:
     artifactsFeeds: 'Analytics'
 
+# Publish the package to Azure DevOps artifacts repo
 - task: AzureCLI@2
-  displayName: 'Publish JAR file to Repo'
+  displayName: 'Publish package to azure devops repo'
   inputs:
     azureSubscription: 'BizSpark Development (RM)'
     scriptType: 'pscore'
     scriptLocation: 'inlineScript'
     inlineScript: |
-      mvn --batch-mode release:update-versions "-DdevelopmentVersion=2.3.1-MOJIO-$(Build.BuildNumber)"
-
       # mvn deploy:deploy-file "-Durl=$(azDevOpsArtifactsUrl)" "-DrepositoryId=Analytics" "-Dfile=$(Build.Repository.LocalPath)/build/libs/couchbase-spark-connector_2.11-2.3.1-MOJIO.jar" "-Dtoken=$(azDevOpsArtifactsPassword)" "-DgeneratePom=true" "-DgeneratePom.description=couchbase" "-Dpackaging=jar" "-Dversion=2.3.1-MOJIO-$(Build.BuildNumber)" "-DgroupId=com.couchbase.client" "-DartifactId=spark-connector"
-      mvn deploy:deploy-file "-Durl=$(azDevOpsArtifactsUrl)" "-DrepositoryId=Analytics" "-Dfile=$(Build.Repository.LocalPath)/build/libs/couchbase-spark-connector_2.11-2.3.1-MOJIO.jar" "-Dtoken=$(azDevOpsArtifactsPassword)" "-DgeneratePom=false" "-DpomFile=$(Build.Repository.LocalPath)/build/publications/mavenJava/pom-default.xml" "-Dpackaging=jar" "-Dversion=2.3.1-MOJIO-$(Build.BuildNumber)" "-DgroupId=com.couchbase.client" "-DartifactId=spark-connector"
+      mvn deploy:deploy-file "-Durl=$(azDevOpsArtifactsUrl)" "-DrepositoryId=Analytics" "-Dfile=$(Build.Repository.LocalPath)/build/libs/couchbase-spark-connector_2.11-2.3.1-MOJIO.jar" "-Dtoken=$(azDevOpsArtifactsPassword)" "-DgeneratePom=false" "-DpomFile=$(Build.Repository.LocalPath)/build/publications/mavenJava/pom-default.xml" "-Dpackaging=jar"
