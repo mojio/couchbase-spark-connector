@@ -72,7 +72,7 @@ class N1QLRelation(bucket: String, userSchema: Option[StructType], parameters: M
       .map(_.value.toString)
     val dataset = sqlContext.sparkSession.createDataset(rdd)(Encoders.STRING)
 
-    var options = collection.mutable.Map[String, String]()
+    val options = collection.mutable.Map[String, String]()
     if (parameters.get("timestampFormat").isDefined) {
       options("timestampFormat") = parameters("timestampFormat")
     }
