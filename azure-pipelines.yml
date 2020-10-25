@@ -10,7 +10,7 @@ steps:
 
 # I'm sure there is a proper way of doing this using maven/gradle/etc.  for now, just do this.
 - task: PowerShell@2
-  displayName: 'Manually patch all SF Manifest versions'
+  displayName: 'Manually patch various versions in build file'
   inputs:
     targetType: 'inline'
     pwsh: true
